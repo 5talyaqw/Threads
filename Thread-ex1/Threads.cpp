@@ -64,11 +64,70 @@ std::vector<int> callGetPrimes(int begin, int end)
 	return primes;
 }
 
-void writePrimesToFile(int begin, int end, std::ofstream file)
+void writePrimesToFile(int begin, int end, std::ofstream& file)
 {
+	for (int i = begin; i <= end; ++i)
+	{
+		if (isPrime(i)) //if the number is prime
+		{
+			file << i << std::endl; //write it to the file
+		}
+	}
 }
+
 
 void callWritePrimesMultipleThreads(int begin, int end, std::string filePath, int N)
 {
+	int i;
+	int threadBegin;
+	int threadEnd;
+	int range;
+
+	//opening file in write mode
+	std::ofstream file(filePath);
+
+	if (!file.is_open())
+	{
+		std::cerr << "error opening file";
+		return;
+	}
+	//start timing
+	auto start = std::chrono::high_resolution_clock::now();
+
+	range = (end - begin + 1) / N; //calc range
+	std::vector<std::thread> threads; //creating vector of threads
+
+	//creating N threads
+	for (i = 0; i < N; ++i)
+	{
+		threadBegin = begin + i * range;
+		if (i == N - 1)
+		{
+			threadEnd = end;
+		}
+		else
+		{
+			threadEnd = threadBegin + range - 1;
+		}
+
+		//creating thread to wrtite primes in sub range
+		threads.emplace_back(writePrimesToFile, threadBegin, threadEnd, std::ref(file));
+	}
+
+	// Wait for all threads to finish
+	for (int i = 0; i < threads.size(); ++i)
+	{
+		threads[i].join();
+	}
+
+	//stop timing
+	auto end_time = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end_time - start;
+
+	//closing file
+	file.close();
+
+	//printing total time
+	std::cout << "Execution time: " << elapsed.count() << " seconds" << std::endl;
 }
 

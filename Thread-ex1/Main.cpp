@@ -1,5 +1,4 @@
 #include "threads.h"
-#include "Bonus.h"
 
 #define NUM_OF_THREADS 10
 
